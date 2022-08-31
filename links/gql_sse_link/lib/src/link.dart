@@ -4,14 +4,9 @@ import "dart:convert";
 import "package:flutter_client_sse/flutter_client_sse.dart";
 import "package:gql_exec/gql_exec.dart";
 import "package:gql_link/gql_link.dart";
-import "package:gql_sse_link/gql_sse_link.dart";
 import "package:http/http.dart" as http;
-import "package:http2/http2.dart";
 import "package:meta/meta.dart";
-import "package:rxdart/rxdart.dart";
 import "package:uuid/uuid.dart";
-import "package:web_socket_channel/status.dart" as websocket_status;
-import "package:web_socket_channel/web_socket_channel.dart";
 
 final uuid = Uuid();
 
@@ -35,8 +30,6 @@ class RequestId extends ContextEntry {
 /// NOTE: the actual socket connection will only get established after
 /// a [Request] is handled by this [SSELink].
 class SSELink extends Link {
-  ClientTransportConnection? transport;
-
   /// Endpoint of the GraphQL service
   final Uri uri;
 
@@ -46,8 +39,8 @@ class SSELink extends Link {
   // Current active subscriptions
   final _requests = <Request>[];
 
-  // subscriptions that need to be re-initialized after channel reconnect
-  final _reConnectRequests = <Request>[];
+  // // subscriptions that need to be re-initialized after channel reconnect
+  // final _reConnectRequests = <Request>[];
 
   /// Serializer used to serialize request
   final RequestSerializer serializer;
@@ -71,16 +64,14 @@ class SSELink extends Link {
         ),
       ) as Map<String, dynamic>?;
 
-  http.Client? _httpClient;
+  // /// Automatically recreate the channel when connection is lost,
+  // /// and re send all active subscriptions. `true` by default.
+  // bool autoReconnect;
 
-  /// Automatically recreate the channel when connection is lost,
-  /// and re send all active subscriptions. `true` by default.
-  bool autoReconnect;
+  // Timer? _reconnectTimer;
 
-  Timer? _reconnectTimer;
-
-  /// The interval between reconnects, the default value is 10 seconds.
-  final Duration reconnectInterval;
+  // /// The interval between reconnects, the default value is 10 seconds.
+  // final Duration reconnectInterval;
 
   // /// Payload to be sent with the connection_init request
   // /// Must be able to `json.encode(initialPayload)`.
@@ -122,16 +113,13 @@ class SSELink extends Link {
   SSELink(
     String uri, {
     this.defaultHeaders = const {},
-    http.Client? httpClient,
-    this.autoReconnect = true,
-    this.reconnectInterval = const Duration(seconds: 10),
+    // this.autoReconnect = true,
+    // this.reconnectInterval = const Duration(seconds: 10),
     this.serializer = const RequestSerializer(),
     this.parser = const ResponseParser(),
     this.httpResponseDecoder = _defaultHttpResponseDecoder,
     // this.inactivityTimeout,
-  }) : uri = Uri.parse(uri) {
-    _httpClient = httpClient ?? http.Client();
-  }
+  }) : uri = Uri.parse(uri);
 
   @override
   Stream<Response> request(Request request, [forward]) async* {
