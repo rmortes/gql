@@ -146,18 +146,18 @@ class SSELink extends Link {
       "Cache-Control": "no-cache",
       ...defaultHeaders,
     };
-
-    final stream = SSEClient.subscribeToSSE(
-        url: uri
-            .replace(queryParameters: serializer.serializeRequest(request))
-            .toString(),
-        header: headers);
+    final queryUri = uri.replace(
+        queryParameters: serializer
+            .serializeRequest(request)
+            .map<String, String>(
+                (key, dynamic value) => MapEntry(key, value.toString())));
+    final stream =
+        SSEClient.subscribeToSSE(url: queryUri.toString(), header: headers);
 
     // plain event
     await for (final message in stream) {
       if (message.data != null) {
-        final data =
-            jsonDecode(message.data!) as Map<String, Map<String, dynamic>>;
+        final data = jsonDecode(message.data!) as Map<String, dynamic>;
         final response = parser.parseResponse(data);
         yield Response(
           data: response.data,
