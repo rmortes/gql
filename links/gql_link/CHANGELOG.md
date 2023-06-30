@@ -1,3 +1,12 @@
+## 1.0.0
+
+- Mark the package as stable with a `1.0.0` release.
+
+## 0.5.1
+
+- add optional statusCode to ServerException 
+
+
 ## 0.5.0
 
 - BREAKING: add stacktrace to exceptions
